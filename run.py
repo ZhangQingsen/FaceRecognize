@@ -20,13 +20,18 @@ transform = transforms.Compose([transforms.Resize((114, 114)),
 
 
 def save_model(_model, dir_path, epoch, _loss, accu):
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
     torch.save(_model.state_dict(), os.path.join(dir_path, 'ep%03d-loss%.3f-accu%.3f.pth' % ((epoch + 1), _loss, accu)))
     # 加载数据
 
 
 def loss(y_pred, Batch_size, alpha=0.2):
-    anchor, positive, negative = y_pred[:int(Batch_size)], y_pred[int(Batch_size):int(2 * Batch_size)], y_pred[
-                                                                                                        int(2 * Batch_size):]
+    if len(y_pred) < 3*Batch_size:
+        Batch_size_prev = Batch_size
+        Batch_size = len(y_pred) // 3
+        print(f"Not enough y_pred ({len(y_pred)}<{3*Batch_size}) left for calculation, Batch_size {Batch_size_prev} ==> {Batch_size}")
+    anchor, positive, negative = y_pred[:int(Batch_size)], y_pred[int(Batch_size):int(2 * Batch_size)], y_pred[int(2 * Batch_size):]
 
     pos_dist = torch.sqrt(torch.sum(torch.pow(anchor - positive, 2), axis=-1))
     neg_dist = torch.sqrt(torch.sum(torch.pow(anchor - negative, 2), axis=-1))
@@ -51,22 +56,23 @@ def run(train_df, test_df, curr_epoch, epoch_step, Batch_size, lr=0.01):
     val_total_CE_loss = 0
     val_total_accuracy = 0
 
-    train_loader = DataLoader(dataloader.DataLoader(train_df, 114), batch_size=129, shuffle=True)
-    test_loader = DataLoader(dataloader.DataLoader(test_df, 114), batch_size=129, shuffle=True)
+    train_loader = DataLoader(dataloader.DataLoader(train_df, 160), Batch_size, shuffle=True, collate_fn=dataloader.dataset_collate)
+    test_loader = DataLoader(dataloader.DataLoader(test_df, 160), Batch_size, shuffle=True)
 
     model_train = model.ConvNet(num_classes=len(np.unique(train_df["Name"])))
+    model_train.to(device)
     scaler = torch.cuda.amp.GradScaler()
     optimizer = optim.SGD(model_train.parameters(), lr, momentum=0.9)
     # optimizer = optim.Adam(model_train.parameters(), lr=0.01,betas=(0.9,0.999))
     for e in range(epoch_step):
         for iteration, batch in enumerate(train_loader):
+            print(iteration)
             images, labels = batch
-            print(images.type(), labels.type())
             with torch.no_grad():
-                # images = torch.from_numpy(images).type(torch.FloatTensor).device()
-                # labels = torch.from_numpy(labels).long().device()
-                images = images.to(device)
-                labels = labels.long().to(device)
+                images = torch.from_numpy(images).type(torch.FloatTensor).to(device)
+                labels = torch.from_numpy(labels).long().to(device)
+                # images = images.to(device)
+                # labels = labels.long().to(device)
             optimizer.zero_grad()
             torchV_lgt_171 = True
             if not torchV_lgt_171:

@@ -55,6 +55,7 @@ class ConvNet(nn.Module):
         )
 
         self.avg = nn.AdaptiveAvgPool2d((1, 1))
+        # self.avg = nn.AdaptiveAvgPool1d(1)
         self.max = nn.MaxPool2d((1, 1))
         self.fc = nn.Linear(1024, 1000)
         for m in self.modules():
@@ -63,9 +64,11 @@ class ConvNet(nn.Module):
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
+
         self.Dropout = nn.Dropout(0.5)
         self.Bottleneck = nn.Linear(1024, 128, bias=False)
         self.last_bn = nn.BatchNorm1d(128, eps=0.001, momentum=0.1, affine=True)
+
         if mode == "train":
             self.classifier = nn.Linear(128, num_classes)
 
@@ -73,26 +76,25 @@ class ConvNet(nn.Module):
         x = self.stage1(x)
         x = self.stage2(x)
         x = self.stage3(x)
-        x = self.max(x)
-        x = x.view(-1, 1024)
-        x = self.fc(x)
+        # x = self.max(x)
+        # x = x.view(-1, 1024)
+        # print(x.shape)
+        # x = self.fc(x)
         return x
 
     def forward(self, x, mode="predict"):
-        if mode == 'predict':
-            x = self.backbone(x)
-            x = self.avg(x)
-            x = x.view(x.size(0), -1)
-            x = self.Dropout(x)
-            x = self.Bottleneck(x)
-            x = self.last_bn(x)
-            x = F.normalize(x, p=2, dim=1)
-            return x
+        
         x = self.backbone(x)
+        # print(x.shape)
         x = self.avg(x)
         x = x.view(x.size(0), -1)
         x = self.Dropout(x)
         x = self.Bottleneck(x)
+
+        if mode == 'predict':
+            x = self.last_bn(x)
+            x = F.normalize(x, p=2, dim=1)
+            return x
         before_normalize = self.last_bn(x)
 
         x = F.normalize(before_normalize, p=2, dim=1)

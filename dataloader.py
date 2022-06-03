@@ -111,7 +111,7 @@ class DataLoader(Dataset):
         image = np.transpose(image, [2, 0, 1])
         images[2, :, :, :] = image
         labels[2] = current_c
-        print("======>",images.shape,labels.shape)
+        # print("======>",images.shape,labels.shape)
         return images, labels
 
     def load_dataset(self):

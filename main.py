@@ -12,4 +12,4 @@ def main(curr_epoch, epoch_step, batch_size=9):
 
 
 if __name__ == "__main__":
-    main(0, 1)
+    main(0, 1, batch_size=129)
