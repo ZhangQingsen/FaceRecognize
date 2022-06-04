@@ -49,6 +49,7 @@ def loss(y_pred, Batch_size, alpha=0.2):
     return res_loss
 
 def train(_model, train_df, epoch, Batch_size, scaler, optimizer):
+    _model.train()
     train_loader = DataLoader(dataloader.DataLoader(train_df, 114), Batch_size, shuffle=True, collate_fn=dataloader.dataset_collate)
     train_length = train_df.shape[0]
 
@@ -99,9 +100,10 @@ def train(_model, train_df, epoch, Batch_size, scaler, optimizer):
         -----accu:{(total_accuracy / (iteration + 1)):.2%}-----loss:{(total_CE_loss / (iteration + 1)):.2f}-----------\
             {(iteration+1)*Batch_size if (iteration+1)*Batch_size < train_length else train_length}/{train_length}")
     # save_model(_model, "./model_data/", epoch, total_CE_loss, total_accuracy)
-    return total_CE_loss, total_accuracy
+    return total_CE_loss/ (iteration + 1), total_accuracy/ (iteration + 1)
 
 def test(_model, test_df, epoch, Batch_size):
+    _model.eval()
     test_loader = DataLoader(dataloader.DataLoader(test_df, 114), Batch_size, shuffle=True, collate_fn=dataloader.dataset_collate)
     test_length = test_df.shape[0]
 
@@ -136,9 +138,9 @@ def test(_model, test_df, epoch, Batch_size):
         #     {(iteration+1)*Batch_size if (iteration+1)*Batch_size < test_length else test_length}/{test_length}")
         print(f"\tTest:\t{((iteration+1)*Batch_size/test_length) if ((iteration+1)*Batch_size/test_length) < 1 else 1:.2%}-----------{(iteration+1)*Batch_size if (iteration+1)*Batch_size < test_length else test_length}/{test_length}")
     
-    print(f'Test------test accu{total_accuracy:.2%}, test loss:{total_CE_loss:.2f}')
+    print(f'Test------test accu:{total_accuracy/ (iteration + 1):.2%}, test loss:{total_CE_loss/ (iteration + 1):.2f}')
     # save_model(_model, "./model_data/", epoch, total_CE_loss, total_accuracy)
-    return total_CE_loss, total_accuracy
+    return total_CE_loss/ (iteration + 1), total_accuracy/ (iteration + 1)
 
 
 def run(df, curr_epoch, epoch_step, Batch_size, lr=0.01, split_rate=0.7, model_load_dir=''):

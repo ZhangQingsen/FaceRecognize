@@ -23,6 +23,6 @@ def main(curr_epoch, epoch_step, batch_size=9, split_rate=0.7, model_load_dir=''
 
 if __name__ == "__main__":
     
-    model_load_dir = './model_data/ep001-loss771.730-accu0.059.pth'
-    # model_load_dir = ''
+    # model_load_dir = './model_data/ep001-loss771.730-accu0.059.pth'
+    model_load_dir = ''
     main(0, 10, batch_size=45, split_rate=0.7, model_load_dir=model_load_dir)
