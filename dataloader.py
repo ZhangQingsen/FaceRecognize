@@ -1,10 +1,10 @@
 import os
-
 import numpy as np
 import cv2
 import torchvision.datasets as datasets
 from PIL import Image
 from torch.utils.data.dataset import Dataset
+from FaceAlign import faceDetectordir
 
 
 def resize_image(image, size, letterbox_image):
@@ -65,8 +65,9 @@ class DataLoader(Dataset):
         # ------------------------------------#
         #   打开图片并放入矩阵
         # ------------------------------------#
-        image = Image.open(selected_path[image_indexes[0]]).resize((self.input_shape, self.input_shape),
-                                                                   Image.ANTIALIAS)
+        # image = Image.open(selected_path[image_indexes[0]]).resize((self.input_shape, self.input_shape),
+        #                                                            Image.ANTIALIAS)
+        image = faceDetectordir(selected_path[image_indexes[0]])
         image = resize_image(image, [self.input_shape, self.input_shape], letterbox_image=True)
         image = (np.array(image, dtype='float32')) / 255.0
 
@@ -75,9 +76,9 @@ class DataLoader(Dataset):
         images[0, :, :, :] = image
         labels[0] = c
 
-        image = Image.open(selected_path[image_indexes[1]]).resize((self.input_shape, self.input_shape),
-                                                                   Image.ANTIALIAS)
-
+        # image = Image.open(selected_path[image_indexes[1]]).resize((self.input_shape, self.input_shape),
+        #                                                            Image.ANTIALIAS)
+        image = faceDetectordir(selected_path[image_indexes[1]])
         image = resize_image(image, [self.input_shape, self.input_shape], letterbox_image=True)
         image = (np.array(image, dtype='float32')) / 255.0
 
@@ -102,9 +103,9 @@ class DataLoader(Dataset):
         #   随机选择一张
         # ------------------------------#
         image_indexes = np.random.choice(range(0, len(selected_path)), 1)
-        image = Image.open(selected_path[image_indexes[0]]).resize((self.input_shape, self.input_shape),
-                                                                   Image.ANTIALIAS)
-
+        # image = Image.open(selected_path[image_indexes[0]]).resize((self.input_shape, self.input_shape),
+        #                                                            Image.ANTIALIAS)
+        image = faceDetectordir(selected_path[image_indexes[0]])
         image = resize_image(image, [self.input_shape, self.input_shape], letterbox_image=True)
         image = (np.array(image, dtype='float32')) / 255.0
 

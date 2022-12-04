@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import Image
 
 # img = cv2.imread('.//lfw//Charles_Bell//Charles_Bell_0001.jpg')
 # img = cv2.imread('.//lfw//Aaron_Guiel//Aaron_Guiel_0001.jpg')
@@ -23,12 +24,19 @@ def align(img):
         res = img.copy()
     return res
 
+def faceDetectordir(img_dir):
+    img = cv2.imread(img_dir)
+    return faceDetector(img)
 
 def faceDetector(img):
     align_img = align(img)
     faces = face_detector.detectMultiScale(align_img, 1.01, 100, cv2.CASCADE_SCALE_IMAGE, (20, 20))
-    for x, y, w, h in faces:
-        align_img = align_img[x:x + w, y:y + h]
+    if len(faces):
+        # print(f'       {len(faces)}， {faces}')
+        for x, y, w, h in faces:
+            align_img = align_img[x:x + w, y:y + h]
+            break
+    align_img = Image.fromarray(cv2.cvtColor(align_img, cv2.COLOR_BGR2RGB)) # 转为PIL image
     return align_img
 
 # eyes = eye_detector.detectMultiScale(res, 1.01, 150, cv2.CASCADE_SCALE_IMAGE, (20, 20))

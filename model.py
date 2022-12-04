@@ -92,11 +92,11 @@ class ConvNet(nn.Module):
         x = self.Bottleneck(x)
 
         if mode == 'predict':
-            x = self.last_bn(x)
+            # x = self.last_bn(x)
             x = F.normalize(x, p=2, dim=1)
             return x
+        
         before_normalize = self.last_bn(x)
-
         x = F.normalize(before_normalize, p=2, dim=1)
         cls = self.classifier(before_normalize)
         return x, cls
